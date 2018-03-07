@@ -11,6 +11,14 @@ import org.json4s.jackson.Serialization.writePretty
 
 import scala.collection.mutable
 
+/**
+  * The main logic is
+  *   - Prepare a map of components by their ids
+  *   - Set derived/own states of the components
+  *   - Sort events by timestamp and update the states by the events
+  *   - Breath First Search for alert components so that we wont miss components because of early visiting of no_data/clear/warning components
+  *   - Breath First Search for alert components so that we wont miss components because of early visiting of no_data/clear components
+  */
 class StateCalculator(val data: Data, val idComponentMap: Map[String, Component]) {
 
   import StateCalculator._
