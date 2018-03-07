@@ -3,7 +3,9 @@ It is assumed that `dependency_of` field can be trusted
  - `Scopt` used for command line parameters parsing
  - `json4s` used for json serialization and deserialization
 
-TODOs 
+TODOs
+ - Don't show when list/set/map are empty in json 
+ - Try reducing the mutable collections using copy() or etc
  - More testing could be added
  - Metrics could be added
  - Benchmark test could be added
