@@ -1,0 +1,34 @@
+{
+  "events": [
+    {
+      "timestamp": "1",
+      "component": "app4",
+      "check_state": "CPU load",
+      "state": "warning"
+    },
+    {
+      "timestamp": "2",
+      "component": "app4",
+      "check_state": "CPU load",
+      "state": "alert"
+    },
+    {
+      "timestamp": "3",
+      "component": "app6",
+      "check_state": "CPU load",
+      "state": "warning"
+    },
+    {
+      "timestamp": "4",
+      "component": "db",
+      "check_state": "CPU load",
+      "state": "clear"
+    },
+    {
+      "timestamp": "5",
+      "component": "app1",
+      "check_state": "CPU load",
+      "state": "clear"
+    }
+  ]
+}

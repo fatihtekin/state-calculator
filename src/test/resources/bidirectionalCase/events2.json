@@ -1,0 +1,16 @@
+{
+  "events": [
+    {
+      "timestamp": "2",
+      "component": "app4",
+      "check_state": "CPU load",
+      "state": "clear"
+    },
+    {
+      "timestamp": "3",
+      "component": "app6",
+      "check_state": "CPU load",
+      "state": "clear"
+    }
+  ]
+}

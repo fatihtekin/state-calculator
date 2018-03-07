@@ -1,0 +1,86 @@
+{
+  "graph": {
+    "components": [
+      {
+        "id": "app",
+        "own_state": "no_data",
+        "derived_state": "no_data",
+        "check_states": {
+          "CPU load": "no_data",
+          "RAM usage": "no_data"
+        },
+        "dependency_of": [
+          "app2"
+        ]
+      },
+      {
+        "id": "app2",
+        "own_state": "no_data",
+        "derived_state": "no_data",
+        "check_states": {
+          "CPU load": "no_data",
+          "RAM usage": "no_data"
+        },
+        "dependency_of": [
+          "app3"
+        ]
+      },
+      {
+        "id": "app3",
+        "own_state": "no_data",
+        "derived_state": "no_data",
+        "check_states": {
+          "CPU load": "no_data",
+          "RAM usage": "no_data"
+        },
+        "dependency_of": [
+          "app"
+        ]
+      },
+      {
+        "id": "db",
+        "own_state": "no_data",
+        "derived_state": "no_data",
+        "check_states": {
+          "CPU load": "no_data",
+          "RAM usage": "no_data"
+        },
+        "dependency_of": [
+          "app",
+          "app5"
+        ]
+      },
+      {
+        "id": "app5",
+        "own_state": "no_data",
+        "derived_state": "no_data",
+        "check_states": {
+          "CPU load": "no_data",
+          "RAM usage": "no_data"
+        },
+        "dependency_of": [
+          "app6",
+          "app7"
+        ]
+      },
+      {
+        "id": "app6",
+        "own_state": "no_data",
+        "derived_state": "no_data",
+        "check_states": {
+          "CPU load": "no_data",
+          "RAM usage": "no_data"
+        }
+      },
+      {
+        "id": "app7",
+        "own_state": "no_data",
+        "derived_state": "no_data",
+        "check_states": {
+          "CPU load": "no_data",
+          "RAM usage": "no_data"
+        }
+      }
+    ]
+  }
+}
