@@ -21,16 +21,16 @@ case class Component (
   def compare(that: Component): Int = this.id.compareTo(that.id)
 }
 
-sealed abstract class State (override val entryName: String, val order: Int) extends EnumEntry with Ordered[State] {
-  def compare(that: State) = this.order - that.order
+sealed abstract class State (override val entryName: String, val priority: Int) extends EnumEntry with Ordered[State] {
+  def compare(that: State) = that.priority - this.priority
 }
 
 object State extends Enum[State]  {
   val values = findValues
-  case object NoData extends State ("no_data", 1)
-  case object Clear extends State ("clear", 2)
-  case object Warning extends State ("warning", 3)
-  case object Alert extends State ("alert", 4)
+  case object Alert extends State ("alert", 1)
+  case object Warning extends State ("warning", 2)
+  case object Clear extends State ("clear", 3)
+  case object NoData extends State ("no_data", 4)
 }
 
 case class EventData(events: List[Event])
