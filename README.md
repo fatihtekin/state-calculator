@@ -8,7 +8,7 @@ The main logic is
  - Set derived/own states of the components
  - Sort events by timestamp and update the states by the events
  - Breath First Search for alert components so that we wont miss components because of early visiting of no_data/clear/warning components
- - Breath First Search for alert components so that we wont miss components because of early visiting of no_data/clear components
+ - Breath First Search for warning components so that we wont miss components because of early visiting of no_data/clear components
   
 TODOs
  - Don't show when list/set/map are empty in json 
