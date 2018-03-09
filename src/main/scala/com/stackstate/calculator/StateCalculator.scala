@@ -1,13 +1,15 @@
 package com.stackstate.calculator
 
 import com.stackstate.calculator.CommandLineRunner.Config
-import com.stackstate.calculator.State.{Clear}
+import com.stackstate.calculator.State.{Alert, Clear, Warning}
 import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods.parse
 import org.json4s._
+
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
 import org.json4s.jackson.Serialization.writePretty
+
 import scala.collection.mutable
 
 /**
@@ -34,7 +36,7 @@ class StateCalculator(val data: Data, val idComponentMap: Map[String, Component]
 
   private def updateStatesOfComponent(c: Component): Unit = {
     c.own_state = c.check_states.values.max
-    c.derived_state = if (c.own_state == Clear) State.NoData else c.own_state
+    c.derived_state = if (c.own_state == Clear) State.NoData else c.check_states.values.max
   }
 
   def getGraphAsJson(): String = {
@@ -44,37 +46,30 @@ class StateCalculator(val data: Data, val idComponentMap: Map[String, Component]
 
   private def traverseGraphToSetDerivedStates(): Unit = {
     val visitedSet = mutable.Set[String]()
-    data.graph.components.foreach{ c =>
-      visitedSet.add(c.id)
-      var list: ListBuffer[Component] = ListBuffer[Component]()
-      list += c
-      while (list.nonEmpty) {
-        val next = list.remove(0)
-        next.dependency_of.flatMap(idComponentMap.get).foreach(dc =>
-          if (!visitedSet.contains(dc.id)) {
-            if (next.derived_state > dc.derived_state ) {
-              dc.derived_state = next.derived_state
+    List(Alert, Warning).foreach{ status =>
+      data.graph.components.toList.filter(_.own_state == status)
+        .sorted(Ordering[Component].reverse).foreach{ c =>
+        visitedSet.add(c.id)
+        var list: ListBuffer[Component] = ListBuffer[Component]()
+        list += c
+        while (list.nonEmpty) {
+          val next = list.remove(0)
+          next.dependency_of.flatMap(idComponentMap.get).foreach(dc =>
+            if (!visitedSet.contains(dc.id)) {
+              if (next.derived_state > dc.derived_state ) {
+                dc.derived_state = next.derived_state
+              }
+              list += dc
+              visitedSet.add(dc.id)
             }
-            list += dc
-            visitedSet.add(dc.id)
-          }
-        )
+          )
+        }
       }
     }
   }
 }
 
 object StateCalculator {
-
-  case object StateSerializer extends CustomSerializer[State](_ => (
-    {
-      case JString(state) => State.withName(state)
-      case JNull => null
-    },
-    {
-      case state:State => JString(state.entryName)
-    })
-  )
 
   implicit val formats = DefaultFormats.skippingEmptyValues + StateSerializer
 

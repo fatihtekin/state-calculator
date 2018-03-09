@@ -1,8 +1,11 @@
 package com.stackstate.calculator
 
 import com.stackstate.calculator.State.NoData
+
 import scala.collection.mutable.Map
 import enumeratum._
+import org.json4s
+import org.json4s.{CustomSerializer, JNull, JString}
 
 case class Data(graph: Graph)
 
@@ -33,3 +36,13 @@ object State extends Enum[State]  {
 case class EventData(events: List[Event])
 
 case class Event (timestamp: String, component: String, check_state: String, state: State)
+
+case object StateSerializer extends CustomSerializer[State](_ => (
+  {
+    case JString(state) => State.withName(state)
+    case JNull => null
+  },
+  {
+    case state:State => JString(state.entryName)
+  })
+)

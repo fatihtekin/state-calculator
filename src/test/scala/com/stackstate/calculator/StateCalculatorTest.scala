@@ -1,11 +1,9 @@
 package com.stackstate.calculator
 
 import com.stackstate.calculator.CommandLineRunner.{Config, args, parser}
-import com.stackstate.calculator.StateCalculator.StateSerializer
 import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods.parse
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
-
 import scala.io.Source
 
 class StateCalculatorTest extends WordSpec
@@ -49,8 +47,7 @@ class StateCalculatorTest extends WordSpec
     val eventData = parse(Source.fromResource(config.eventsFile).bufferedReader()).extract[EventData]
     val stateCalculator = StateCalculator(config)
     stateCalculator.updateGraphByEvents(eventData.events)
-    println(stateCalculator.getGraphAsJson())
-    //shouldBe Source.fromResource(expectedOutputFile).mkString
+    stateCalculator.getGraphAsJson() shouldBe Source.fromResource(expectedOutputFile).mkString
     stateCalculator
   }
 

@@ -1,10 +1,8 @@
 package com.stackstate.calculator
 
-import com.stackstate.calculator.StateCalculator.StateSerializer
 import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods.parse
 import scopt.OptionParser
-
 import scala.io.Source
 /**
   * Main method entry for the graph calculator
