@@ -1,7 +1,7 @@
 package com.stackstate.calculator
 
 import com.stackstate.calculator.CommandLineRunner.Config
-import com.stackstate.calculator.State.{Alert, Clear, NoData, Warning}
+import com.stackstate.calculator.State.{Clear}
 import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods.parse
 import org.json4s._
@@ -23,12 +23,12 @@ class StateCalculator(val data: Data, val idComponentMap: Map[String, Component]
 
   def updateGraphByEvents(events: List[Event]): Unit = {
     data.graph.components.foreach(updateStatesOfComponent)
-    events.sortBy(_.timestamp.toLong)
-      .foreach(e => idComponentMap.get(e.component)
-        .foreach(c => {
-          c.check_states.put(e.check_state, e.state)
-          updateStatesOfComponent(c)
-        }))
+    events.sortBy(_.timestamp.toLong).foreach { e =>
+      idComponentMap.get(e.component).foreach { c =>
+        c.check_states.put(e.check_state, e.state)
+        updateStatesOfComponent(c)
+      }
+    }
     traverseGraphToSetDerivedStates()
   }
 
@@ -44,7 +44,7 @@ class StateCalculator(val data: Data, val idComponentMap: Map[String, Component]
 
   private def traverseGraphToSetDerivedStates(): Unit = {
     val visitedSet = mutable.Set[String]()
-    data.graph.components.foreach(c => {
+    data.graph.components.foreach{ c =>
       visitedSet.add(c.id)
       var list: ListBuffer[Component] = ListBuffer[Component]()
       list += c
@@ -60,7 +60,7 @@ class StateCalculator(val data: Data, val idComponentMap: Map[String, Component]
           }
         )
       }
-    })
+    }
   }
 }
 
