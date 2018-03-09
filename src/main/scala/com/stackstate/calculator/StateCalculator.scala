@@ -43,9 +43,8 @@ class StateCalculator(val data: Data, val idComponentMap: Map[String, Component]
   }
 
   private def traverseGraphToSetDerivedStates(): Unit = {
-    val warningComponents = data.graph.components.filter(_.own_state.in(Alert, Warning))
     val visitedSet = mutable.Set[String]()
-    warningComponents.foreach(c => {
+    data.graph.components.foreach(c => {
       visitedSet.add(c.id)
       var list: ListBuffer[Component] = ListBuffer[Component]()
       list += c
