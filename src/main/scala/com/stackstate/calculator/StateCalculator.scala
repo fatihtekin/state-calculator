@@ -1,14 +1,13 @@
 package com.stackstate.calculator
 
 import com.stackstate.calculator.CommandLineRunner.Config
+import com.stackstate.calculator.State.{Alert, Clear, NoData, Warning}
 import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods.parse
 import org.json4s._
-
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
 import org.json4s.jackson.Serialization.writePretty
-
 import scala.collection.mutable
 
 /**
@@ -16,8 +15,7 @@ import scala.collection.mutable
   *   - Prepare a map of components by their ids
   *   - Set derived/own states of the components
   *   - Sort events by timestamp and update the states by the events
-  *   - Breath First Search for alert components so that we wont miss components because of early visiting of no_data/clear/warning components
-  *   - Breath First Search for alert components so that we wont miss components because of early visiting of no_data/clear components
+  *   - Breath First Search for alert and warning components
   */
 class StateCalculator(val data: Data, val idComponentMap: Map[String, Component]) {
 
@@ -31,8 +29,12 @@ class StateCalculator(val data: Data, val idComponentMap: Map[String, Component]
           c.check_states.put(e.check_state, e.state)
           updateStatesOfComponent(c)
         }))
-    bfsGraph(alert)
-    bfsGraph(warning)
+    traverseGraphToSetDerivedStates()
+  }
+
+  private def updateStatesOfComponent(c: Component): Unit = {
+    c.own_state = c.check_states.values.max
+    c.derived_state = if (c.own_state == Clear) State.NoData else c.own_state
   }
 
   def getGraphAsJson(): String = {
@@ -40,8 +42,8 @@ class StateCalculator(val data: Data, val idComponentMap: Map[String, Component]
     writePretty(data.copy(graph))(formats)
   }
 
-  private def bfsGraph(status: String): Unit = {
-    val warningComponents = data.graph.components.filter(_.own_state == status)
+  private def traverseGraphToSetDerivedStates(): Unit = {
+    val warningComponents = data.graph.components.filter(_.own_state.in(Alert, Warning))
     val visitedSet = mutable.Set[String]()
     warningComponents.foreach(c => {
       visitedSet.add(c.id)
@@ -51,10 +53,8 @@ class StateCalculator(val data: Data, val idComponentMap: Map[String, Component]
         val next = list.remove(0)
         next.dependency_of.flatMap(idComponentMap.get).foreach(dc =>
           if (!visitedSet.contains(dc.id)) {
-            if (next.derived_state == alert) {
-              dc.derived_state = alert
-            } else if (next.derived_state == warning && dc.derived_state != alert) {
-              dc.derived_state = warning
+            if (next.derived_state > dc.derived_state ) {
+              dc.derived_state = next.derived_state
             }
             list += dc
             visitedSet.add(dc.id)
@@ -63,30 +63,21 @@ class StateCalculator(val data: Data, val idComponentMap: Map[String, Component]
       }
     })
   }
-
-  private def updateStatesOfComponent(c: Component): Unit = {
-    c.own_state = no_data
-    c.derived_state = no_data
-    if (c.check_states.values.exists(cs => cs == alert)) {
-      c.own_state = alert
-      c.derived_state = alert
-    } else if (c.check_states.values.exists(cs => cs == warning)) {
-      c.own_state = warning
-      c.derived_state = warning
-    } else if (c.check_states.values.exists(cs => cs == clear)) {
-      c.own_state = clear
-    }
-  }
 }
 
 object StateCalculator {
 
-  val alert = "alert"
-  val warning = "warning"
-  val clear = "clear"
-  val no_data = "no_data"
+  case object StateSerializer extends CustomSerializer[State](_ => (
+    {
+      case JString(state) => State.withName(state)
+      case JNull => null
+    },
+    {
+      case state:State => JString(state.entryName)
+    })
+  )
 
-  implicit val formats = DefaultFormats.skippingEmptyValues
+  implicit val formats = DefaultFormats.skippingEmptyValues + StateSerializer
 
   def apply(config: Config): StateCalculator = {
     val graphData: Data = parse(Source.fromFile(config.graphFile).bufferedReader()).extract[Data]

@@ -1,5 +1,6 @@
 package com.stackstate.calculator
 
+import com.stackstate.calculator.StateCalculator.StateSerializer
 import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods.parse
 import scopt.OptionParser
@@ -10,7 +11,7 @@ import scala.io.Source
   */
 object CommandLineRunner extends App {
 
-  implicit val formats = DefaultFormats
+  implicit val formats = DefaultFormats + StateSerializer
   //Commandline params to the case class
   case class Config(graphFile: String = null, eventsFile: String = null)
 
