@@ -1,15 +1,13 @@
 package com.stackstate.calculator
 
 import com.stackstate.calculator.CommandLineRunner.Config
-import com.stackstate.calculator.State.{Alert, Clear, Warning}
+import com.stackstate.calculator.State.{Clear}
 import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods.parse
 import org.json4s._
-
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
 import org.json4s.jackson.Serialization.writePretty
-
 import scala.collection.mutable
 
 /**
@@ -45,25 +43,22 @@ class StateCalculator(val data: Data, val idComponentMap: Map[String, Component]
   }
 
   private def traverseGraphToSetDerivedStates(): Unit = {
-    val visitedSet = mutable.Set[String]()
-    List(Alert, Warning).foreach{ status =>
-      data.graph.components.toList.filter(_.own_state == status)
-        .sorted(Ordering[Component].reverse).foreach{ c =>
-        visitedSet.add(c.id)
-        var list: ListBuffer[Component] = ListBuffer[Component]()
-        list += c
-        while (list.nonEmpty) {
-          val next = list.remove(0)
-          next.dependency_of.flatMap(idComponentMap.get).foreach(dc =>
-            if (!visitedSet.contains(dc.id)) {
-              if (next.derived_state > dc.derived_state ) {
-                dc.derived_state = next.derived_state
-              }
-              list += dc
-              visitedSet.add(dc.id)
+    data.graph.components.foreach { c =>
+      val visitedSet = mutable.Set[String]()
+      visitedSet.add(c.id)
+      var list: ListBuffer[Component] = ListBuffer[Component]()
+      list += c
+      while (list.nonEmpty) {
+        val next = list.remove(0)
+        next.dependency_of.flatMap(idComponentMap.get).foreach(dc =>
+          if (!visitedSet.contains(dc.id)) {
+            if (next.derived_state > dc.derived_state) {
+              dc.derived_state = next.derived_state
             }
-          )
-        }
+            list += dc
+            visitedSet.add(dc.id)
+          }
+        )
       }
     }
   }
